@@ -3,11 +3,12 @@ package com.kamer.springbootuserregistration.config;
 import com.kamer.springbootuserregistration.user.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 /**
  * Created on September, 2019
@@ -18,15 +19,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @AllArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-	private final PasswordEncoder bCryptPasswordEncoder;
-
 	private final UserService userService;
+
+	@Bean
+	public BCryptPasswordEncoder bCryptPasswordEncoder() {
+
+		return new BCryptPasswordEncoder();
+	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
-		http.csrf()
-				.disable()
+		http
 				.authorizeRequests()
 				.antMatchers("/sign-up/**", "/sign-in/**")
 				.permitAll()
@@ -40,11 +44,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-
-		final CustomAuthenticationProvider authenticationProvider = new CustomAuthenticationProvider();
-		authenticationProvider.setUserDetailsService(userService);
-		authenticationProvider.setPasswordEncoder(bCryptPasswordEncoder);
-		auth.authenticationProvider(authenticationProvider);
+		auth.userDetailsService(userService)
+				.passwordEncoder(bCryptPasswordEncoder());
 	}
 
 }

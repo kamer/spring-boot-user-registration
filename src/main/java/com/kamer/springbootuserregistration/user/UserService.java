@@ -47,12 +47,8 @@ public class UserService implements UserDetailsService {
 
 		final Optional<User> optionalUser = userRepository.findByEmail(email);
 
-		if (optionalUser.isPresent()) {
-			return optionalUser.get();
-		}
-		else {
-			throw new UsernameNotFoundException(MessageFormat.format("User with email {0} cannot be found.", email));
-		}
+		return optionalUser.orElseThrow(() -> new UsernameNotFoundException(MessageFormat.format("User with email {0} cannot be found.", email)));
+
 	}
 
 	public void signUpUser(User user) {
